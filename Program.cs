@@ -1,26 +1,45 @@
+using Microsoft.EntityFrameworkCore;
+using MassTransit;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+
+builder.Services.AddDbContext<StoreDbContext>(options =>
+    options.UseSqlite("Data Source=store.db"));
+
+builder.Services.AddHttpClient();
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var host = builder.Configuration.GetValue<string>("RabbitMq:Host") ?? "localhost";
+        var username = builder.Configuration.GetValue<string>("RabbitMq:Username");
+        var password = builder.Configuration.GetValue<string>("RabbitMq:Password");
+
+        cfg.Host(host, h =>
+        {
+            if(!string.IsNullOrWhiteSpace(username)) h.Username(username);
+            if(!string.IsNullOrWhiteSpace(password)) h.Password(password);
+        });
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if(!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapControllers();
+app.MapRazorPages();
 
 app.Run();

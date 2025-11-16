@@ -1,13 +1,34 @@
 ﻿using Core.Messages;
+using Core.Models;
+using Core.Services;
 using MassTransit;
 
 public class ProductCreatedConsumer: IConsumer<ProductCreated>
 {
-    public Task Consume(ConsumeContext<ProductCreated> context)
+    private readonly IProductService _productService;
+
+    public ProductCreatedConsumer(IProductService productService)
+    {
+        _productService = productService;
+    }
+
+    public async Task Consume(ConsumeContext<ProductCreated> context)
     {
         var message = context.Message;
-        Console.WriteLine($"Product created: {message.Name} (${message.Price})");
-        // Update UI, cache, or trigger workflow here
-        return Task.CompletedTask;
+
+        var product = new Product
+        {
+            ProductId = message.Product.ProductId,
+            Name = message.Product.Name,
+            Description = message.Product.Description,
+            Price = message.Product.Price,
+            MinPrice = message.Product.MinPrice,
+            CreatedOn = message.Product.CreatedOn,
+            UpdatedOn = message.Product.UpdatedOn
+        };
+
+        await _productService.CreateProductAsync(product);
+
+        await Task.CompletedTask;
     }
 }

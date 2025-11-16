@@ -10,30 +10,29 @@ namespace StoreAppWebAPI.Controllers
     [Route("[controller]")]
     public class ProductsController: ControllerBase
     {
-        private readonly ILogger<ProductsController> _logger;
-        private readonly IPublishEndpoint _publishEndpoint;
         private readonly IProductService _productService;
+        private readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public ProductsController(ILogger<ProductsController> logger, 
-                                  IPublishEndpoint publishEndpoint, 
-                                  IProductService productService)
+
+        public ProductsController(IProductService productService, ISendEndpointProvider sendEndpointProvider)
         {
-            _logger = logger;
-            _publishEndpoint = publishEndpoint;
             _productService = productService;
+            _sendEndpointProvider = sendEndpointProvider;
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Product product)
         {
-            // Save to DB here...
+            var createdProduct = await _productService.CreateProductAsync(product);
 
-            await _productService.CreateProduct(product);
+            if(createdProduct != null)
+            {
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductCreatedQueue}"));
 
-            // Publish event
-            //await _publishEndpoint.Publish(new ProductCreated(product.ProductId, product.Name, product.Price));
+                await endpoint.Send(new ProductCreated(MessageQueues.StoreID, createdProduct));
+            }
 
-            return Ok(product);
+            return Ok(createdProduct);
         }
 
         [HttpGet]
@@ -41,6 +40,9 @@ namespace StoreAppWebAPI.Controllers
         {
             return await _productService.GetProductsAsync();
         }
+
+        [HttpGet]
+        public IActionResult GetHealth() => Ok("StoreApp is healthy");
     }
 }   
 

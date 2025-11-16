@@ -1,16 +1,19 @@
 ﻿using Core.Data;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Services
 {
-    public class ProductService : IProductService
+    public class ProductService: IProductService
     {
         private readonly StoreDbContext _dbContext;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(StoreDbContext dbContext)
+        public ProductService(StoreDbContext dbContext, ILogger<ProductService> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<List<Product>> GetProductsAsync()
@@ -20,24 +23,24 @@ namespace Core.Services
             try
             {
                 products = await _dbContext.Products.ToListAsync();
-                
+
                 return products;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                // logging can be added here
+                _logger.LogError(ex, "An error occurred while retrieving products.");
 
                 throw;
-            }   
+            }
         }
 
-        public async Task<bool> CreateProduct(Product product)
+        public async Task<Product> CreateProductAsync(Product product)
         {
             try
             {
                 if (product == null || !ValidateProduct(product))
                 {
-                    return false;
+                    return null;
                 }
 
                 if (await _dbContext.Products.AnyAsync(p => p.Name == product.Name))
@@ -51,13 +54,13 @@ namespace Core.Services
 
                     if (!ValidateProduct(existingProduct))
                     {
-                        return false;
+                        return null;
                     }
 
                     _dbContext.Products.Update(existingProduct);
                     await _dbContext.SaveChangesAsync();
 
-                    return true;
+                    return existingProduct;
                 }
 
                 product.ProductId = Guid.NewGuid();
@@ -67,17 +70,17 @@ namespace Core.Services
                 await _dbContext.Products.AddAsync(product);
                 await _dbContext.SaveChangesAsync();
 
-                return true;
+                return product;
             }
             catch (Exception ex)
             {
-                // logging can be added here
+                _logger.LogError(ex, "An error occurred while creating a product.");
 
                 throw;
             }
         }
 
-        public async Task<bool> DeleteProduct(Guid productId)
+        public async Task<bool> DeleteProductAsync(Guid productId)
         {
             try
             {
@@ -98,9 +101,9 @@ namespace Core.Services
 
                 return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                // logging can be added here
+                _logger.LogError(ex, "An error occurred while deleting a product.");
 
                 throw;
             }
@@ -108,34 +111,33 @@ namespace Core.Services
 
         private bool ValidateProduct(Product product)
         {
-            if (string.IsNullOrWhiteSpace(product.Name) || product.Price < 0 || product.MinPrice < 0)
+            if (string.IsNullOrWhiteSpace(product.Name) || product.Price < 0 || product.MinPrice < 0 || product.Price == 0 || product.MinPrice == 0)
             {
-                // logging can be added here
+                _logger.LogWarning("Product {ProductId} has invalid Name, Price or MinPrice.", product.ProductId);
 
                 return false;
             }
 
             if (product.MinPrice > product.Price)
             {
-                // logging can be added here
+                _logger.LogWarning("Product {ProductId} has a MinPrice greater than its Price.", product.ProductId);
 
                 return false;
             }
 
             if (product.Description != null && product.Description.Length > 500)
             {
-                // logging can be added here
+                _logger.LogWarning("Product {ProductId} has a Description longer than 500 characters.", product.ProductId);
 
                 return false;
             }
 
             if (product.Name.Length > 100)
             {
-                // logging can be added here
+                _logger.LogWarning("Product {ProductId} has a Name longer than 100 characters.", product.ProductId);
 
                 return false;
             }
-
 
             return true;
         }

@@ -1,17 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Core.Messages;
 using Core.Models;
 using Core.Services;
+using MassTransit;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace StoreWebApp.Pages;
 
 public class CreateModel: PageModel
 {
     private readonly IProductService _productService;
+    private readonly ISendEndpointProvider _sendEndpointProvider;
 
-    public CreateModel(IProductService productService)
+
+    public CreateModel(IProductService productService, ISendEndpointProvider sendEndpointProvider)
     {
         _productService = productService;
+        _sendEndpointProvider = sendEndpointProvider;
     }
 
     [BindProperty]
@@ -37,7 +42,7 @@ public class CreateModel: PageModel
             return Page();
         }
 
-        bool isCreated = await _productService.CreateProduct(new Product()
+        var product = await _productService.CreateProductAsync(new Product()
         {
             Name = Name,
             Description = Description,
@@ -45,6 +50,15 @@ public class CreateModel: PageModel
             MinPrice = decimal.TryParse(MinPrice, out var minPrice) ? minPrice : 0
         });
 
-        return isCreated ? RedirectToPage("Index") : Page();
+        if (product != null)
+        {
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductCreatedQueue}"));
+
+            await endpoint.Send(new ProductCreated(MessageQueues.StoreID, product));
+
+            return RedirectToPage("Index");
+        }
+
+        return Page();
     }
 }

@@ -32,7 +32,7 @@ public class IndexModel: PageModel
             return Page();
         }
 
-        bool isDeleted = await _productService.DeleteProduct(Guid.TryParse(ProductId, out var productId) ? productId : Guid.Empty);
+        bool isDeleted = await _productService.DeleteProductAsync(Guid.TryParse(ProductId, out var productId) ? productId : Guid.Empty);
 
         return isDeleted ? RedirectToPage("Index") : Page();
     }

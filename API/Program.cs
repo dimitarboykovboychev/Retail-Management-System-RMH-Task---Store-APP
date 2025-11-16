@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IProductService, ProductService>();
+
 builder.Services.AddDbContext<StoreDbContext>(options =>
     options.UseSqlite("Data Source=../store.db"));
 
@@ -26,6 +27,21 @@ builder.Services.AddMassTransit(x =>
         {
             if(!string.IsNullOrWhiteSpace(username)) h.Username(username);
             if(!string.IsNullOrWhiteSpace(password)) h.Password(password);
+        });
+
+        // move this to MessagesQueues in Messages.cs
+        var storeId = MessageQueues.StoreID.ToString();
+        var queueName = $"store-{storeId}";
+
+        cfg.ReceiveEndpoint(queueName, e =>
+        {
+            e.Bind("store-exchange", x =>
+            {
+                x.ExchangeType = "topic";
+                x.RoutingKey = $"{storeId}.product";
+            });
+
+            e.ConfigureConsumer<ProductCreatedConsumer>(context);
         });
     });
 });

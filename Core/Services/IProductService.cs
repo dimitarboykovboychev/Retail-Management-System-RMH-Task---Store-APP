@@ -6,8 +6,8 @@ namespace Core.Services
     {
         Task<List<Product>> GetProductsAsync();
 
-        Task<bool> CreateProduct(Product product);
+        Task<Product> CreateProductAsync(Product product);
 
-        Task<bool> DeleteProduct(Guid productId);
+        Task<bool> DeleteProductAsync(Guid productId);
     }
 }

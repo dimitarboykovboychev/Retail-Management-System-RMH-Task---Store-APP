@@ -3,6 +3,18 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Build artifacts
+bin/
+obj/
+.vs/
+
+# User-specific files
+*.csproj.user
+*.slnLaunch.user
+
+# Vendor libraries restored by LibMan or npm
+WebApp/wwwroot/lib/
+
 # User-specific files
 *.rsuser
 *.suo

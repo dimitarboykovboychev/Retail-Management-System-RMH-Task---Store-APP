@@ -1,13 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using MassTransit;
+using Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<StoreDbContext>(options =>
-    options.UseSqlite("Data Source=store.db"));
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddHttpClient();
 
@@ -28,12 +27,6 @@ builder.Services.AddMassTransit(x =>
 });
 
 var app = builder.Build();
-
-if(!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-}
 
 app.UseHttpsRedirection();
 app.UseRouting();

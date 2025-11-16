@@ -1,20 +1,20 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Core.Data;
+using Core.Models;
 
-namespace Retail_Management_System__RMH_Task____Store_APP.Pages
+namespace StoreWebApp.Pages;
+
+public class IndexModel: PageModel
 {
-    public class IndexModel : PageModel
+    public IndexModel()
     {
-        private readonly ILogger<IndexModel> _logger;
+        
+    }
 
-        public IndexModel(ILogger<IndexModel> logger)
-        {
-            _logger = logger;
-        }
+    public IList<Product> Products { get; set; } = new List<Product>();
 
-        public void OnGet()
-        {
-
-        }
+    public void OnGet()
+    {
+        
     }
 }

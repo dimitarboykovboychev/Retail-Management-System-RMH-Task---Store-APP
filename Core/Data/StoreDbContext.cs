@@ -26,14 +26,17 @@ public class StoreDbContext: DbContext
                   .HasMaxLength(500);
 
             entity.Property(p => p.Price)
-                  .HasColumnType("decimal(18,2)");
-
+                  .HasColumnType("decimal(18,2)")
+                  .IsRequired();
+                    
             entity.Property(p => p.MinPrice)
                   .HasColumnType("decimal(18,2)");
 
-            entity.Property(p => p.CreatedOn);
+            entity.Property(p => p.CreatedOn)
+                  .HasColumnType("datetime2");
 
-            entity.Property(p => p.UpdatedOn);
+            entity.Property(p => p.UpdatedOn)
+                  .HasColumnType("datetime2");
         });
     }
 }

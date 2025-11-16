@@ -3,11 +3,11 @@ using Core.Models;
 using Core.Services;
 using MassTransit;
 
-public class ProductCreatedConsumer: IConsumer<CreateProduct>
+public class CreateProductConsumer: IConsumer<CreateProduct>
 {
     private readonly IProductService _productService;
 
-    public ProductCreatedConsumer(IProductService productService)
+    public CreateProductConsumer(IProductService productService)
     {
         _productService = productService;
     }

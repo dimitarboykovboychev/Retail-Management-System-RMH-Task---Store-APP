@@ -10,22 +10,26 @@
     <h2>Create Product</h2>
 
     <form method="post">
+        @Html.AntiForgeryToken()
+
         <div class="mb-3">
-            <label asp-for="Product.Name" class="form-label"></label>
-            <input asp-for="Product.Name" class="form-control" />
-            <span asp-validation-for="Product.Name" class="text-danger"></span>
+            <label for="Name" class="form-label">Name</label>
+            <input id="Name" name="Name" class="form-control" />
         </div>
 
         <div class="mb-3">
-            <label asp-for="Product.Price" class="form-label"></label>
-            <input asp-for="Product.Price" class="form-control" />
-            <span asp-validation-for="Product.Price" class="text-danger"></span>
+            <label for="Price" class="form-label">Price</label>
+            <input id="Price" name="Price" class="form-control" />
         </div>
 
         <div class="mb-3">
-            <label asp-for="Product.Description" class="form-label"></label>
-            <textarea asp-for="Product.Description" class="form-control"></textarea>
-            <span asp-validation-for="Product.Description" class="text-danger"></span>
+            <label for="MinPrice" class="form-label">Min Price</label>
+            <input id="MinPrice" name="MinPrice" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="Description" class="form-label">Description</label>
+            <textarea id="Description" name="Description" class="form-control"></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>

@@ -20,7 +20,9 @@
                             <h5 class="card-title">@product.Name</h5>
                             <p class="card-text text-muted">Price: @product.Price</p>
                         </div>
-                        <form method="post" asp-page-handler="Delete" asp-route-id="@product.ProductId">
+                        <form method="post" action="?handler=Delete">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ProductId" value="@product.ProductId" />
                             <button type="submit" class="btn btn-danger btn-sm">X</button>
                         </form>
                     </div>

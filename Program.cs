@@ -1,5 +1,7 @@
-using MassTransit;
+using Core.Data;
 using Core.Services;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,8 +9,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IProductService, ProductService>();
-
-builder.Services.AddHttpClient();
+builder.Services.AddDbContext<StoreDbContext>(options =>
+    options.UseSqlite("Data Source=store.db"));
 
 builder.Services.AddMassTransit(x =>
 {

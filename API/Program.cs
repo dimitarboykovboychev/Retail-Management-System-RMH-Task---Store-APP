@@ -30,7 +30,7 @@ builder.Services.AddMassTransit(x =>
         });
 
         // move this to MessagesQueues in Messages.cs
-        var storeId = MessageQueues.StoreID.ToString();
+        var storeId = MessageQueues.StoreId.ToString();
         var queueName = $"store-{storeId}";
 
         cfg.ReceiveEndpoint(queueName, e =>

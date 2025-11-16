@@ -54,7 +54,7 @@ public class CreateModel: PageModel
         {
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductCreatedQueue}"));
 
-            await endpoint.Send(new ProductCreated(MessageQueues.StoreID, product));
+            await endpoint.Send(new ProductCreated(MessageQueues.StoreId, product));
 
             return RedirectToPage("Index");
         }

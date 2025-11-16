@@ -4,7 +4,7 @@ using Core.Services;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
-namespace StoreAppWebAPI.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -29,7 +29,7 @@ namespace StoreAppWebAPI.Controllers
             {
                 var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductCreatedQueue}"));
 
-                await endpoint.Send(new ProductCreated(MessageQueues.StoreID, createdProduct));
+                await endpoint.Send(new ProductCreated(MessageQueues.StoreId, createdProduct));
             }
 
             return Ok(createdProduct);

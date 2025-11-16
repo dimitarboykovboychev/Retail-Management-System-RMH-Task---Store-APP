@@ -3,7 +3,7 @@ using Core.Models;
 using Core.Services;
 using MassTransit;
 
-public class ProductCreatedConsumer: IConsumer<ProductCreated>
+public class ProductCreatedConsumer: IConsumer<CreateProduct>
 {
     private readonly IProductService _productService;
 
@@ -12,19 +12,24 @@ public class ProductCreatedConsumer: IConsumer<ProductCreated>
         _productService = productService;
     }
 
-    public async Task Consume(ConsumeContext<ProductCreated> context)
+    public async Task Consume(ConsumeContext<CreateProduct> context)
     {
         var message = context.Message;
 
+        if (message.ProductExtended.StoreId != MessageQueues.StoreId)
+        {
+            return;
+        }
+
         var product = new Product
         {
-            ProductId = message.Product.ProductId,
-            Name = message.Product.Name,
-            Description = message.Product.Description,
-            Price = message.Product.Price,
-            MinPrice = message.Product.MinPrice,
-            CreatedOn = message.Product.CreatedOn,
-            UpdatedOn = message.Product.UpdatedOn
+            ProductId = message.ProductExtended.ProductId,
+            Name = message.ProductExtended.Name,
+            Description = message.ProductExtended.Description,
+            Price = message.ProductExtended.Price,
+            MinPrice = message.ProductExtended.MinPrice,
+            CreatedOn = message.ProductExtended.CreatedOn,
+            UpdatedOn = message.ProductExtended.UpdatedOn
         };
 
         await _productService.CreateProductAsync(product);

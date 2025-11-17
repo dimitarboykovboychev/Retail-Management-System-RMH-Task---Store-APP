@@ -1,10 +1,18 @@
-using Core.Data;
 using Core.Messages;
+using Core.Data;
 using Core.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using API.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var storeID = builder.Configuration.GetValue<Guid>("Store:StoreID");
+var centralQueue = builder.Configuration.GetValue<string>("Store:CentralQueue");
+
+var messageQueues = new MessageQueues(storeID, centralQueue);
+
+builder.Services.AddSingleton(messageQueues);
 
 builder.Services.AddControllers();
 
@@ -16,6 +24,7 @@ builder.Services.AddDbContext<StoreDbContext>(options =>
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<CreateProductConsumer>();
+    x.AddConsumer<DeleteProductConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -25,19 +34,20 @@ builder.Services.AddMassTransit(x =>
 
         cfg.Host(host, h =>
         {
-            if(!string.IsNullOrWhiteSpace(username)) h.Username(username);
-            if(!string.IsNullOrWhiteSpace(password)) h.Password(password);
+            if (!string.IsNullOrWhiteSpace(username)) h.Username(username);
+            if (!string.IsNullOrWhiteSpace(password)) h.Password(password);
         });
 
-        cfg.ReceiveEndpoint(MessageQueues.CreateProductQueue, e =>
+        cfg.ReceiveEndpoint(messageQueues.StoreQueue, e =>
         {
             e.Bind("store-exchange", x =>
             {
                 x.ExchangeType = "topic";
-                x.RoutingKey = MessageQueues.RoutingKey;
+                x.RoutingKey = messageQueues.RoutingKey;
             });
 
             e.ConfigureConsumer<CreateProductConsumer>(context);
+            e.ConfigureConsumer<DeleteProductConsumer>(context);
         });
     });
 });

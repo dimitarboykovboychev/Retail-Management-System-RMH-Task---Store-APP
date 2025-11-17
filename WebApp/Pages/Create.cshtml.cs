@@ -11,16 +11,18 @@ public class CreateModel: PageModel
 {
     private readonly IProductService _productService;
     private readonly ISendEndpointProvider _sendEndpointProvider;
+    private readonly MessageQueues _messageQueues;
 
-
-    public CreateModel(IProductService productService, ISendEndpointProvider sendEndpointProvider)
+    public CreateModel(IProductService productService, ISendEndpointProvider sendEndpointProvider, MessageQueues messageQueues)
     {
         _productService = productService;
         _sendEndpointProvider = sendEndpointProvider;
+        _messageQueues = messageQueues;
     }
 
     [BindProperty]
     public string Name { get; set; }
+
 
     [BindProperty]
     public string Price { get; set; }
@@ -52,9 +54,9 @@ public class CreateModel: PageModel
 
         if (product != null)
         {
-            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{_messageQueues.CentralQueue}"));
 
-            await endpoint.Send(new ProductCreated(MessageQueues.StoreId, product));
+            await endpoint.Send(new ProductCreated(_messageQueues.StoreID, product));
 
             return RedirectToPage("Index");
         }

@@ -12,12 +12,13 @@ namespace API.Controllers
     {
         private readonly IProductService _productService;
         private readonly ISendEndpointProvider _sendEndpointProvider;
+        private readonly MessageQueues _messageQueues;
 
-
-        public ProductsController(IProductService productService, ISendEndpointProvider sendEndpointProvider)
+        public ProductsController(IProductService productService, ISendEndpointProvider sendEndpointProvider, MessageQueues messageQueues)
         {
             _productService = productService;
             _sendEndpointProvider = sendEndpointProvider;
+            _messageQueues = messageQueues;
         }
 
         [HttpPost]
@@ -27,9 +28,8 @@ namespace API.Controllers
 
             if(createdProduct != null)
             {
-                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
-
-                await endpoint.Send(new ProductCreated(MessageQueues.StoreId, createdProduct));
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{_messageQueues.CentralQueue}"));
+                await endpoint.Send(new ProductCreated(_messageQueues.StoreID, createdProduct));
             }
 
             return Ok(createdProduct);
@@ -38,7 +38,7 @@ namespace API.Controllers
         [HttpDelete("{storeId}/{productId}")]
         public async Task<IActionResult> Delete(Guid storeId, Guid productId)
         {
-            if (storeId != MessageQueues.StoreId)
+            if (storeId != _messageQueues.StoreID)
             {
                 return BadRequest("Invalid StoreId");
             }
@@ -47,9 +47,9 @@ namespace API.Controllers
 
             if (isDeleted)
             {
-                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
-                await endpoint.Send(new ProductDeleted(MessageQueues.StoreId, productId));
-                
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{_messageQueues.CentralQueue}"));
+                await endpoint.Send(new ProductDeleted(_messageQueues.StoreID, productId));
+
                 return Ok();
             }
             

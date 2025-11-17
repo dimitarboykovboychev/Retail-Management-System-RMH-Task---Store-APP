@@ -11,11 +11,13 @@ public class IndexModel: PageModel
 {
     private readonly IProductService _productService;
     private readonly ISendEndpointProvider _sendEndpointProvider;
+    private readonly MessageQueues _messageQueues;
 
-    public IndexModel(IProductService productService, ISendEndpointProvider sendEndpointProvider)
+    public IndexModel(IProductService productService, ISendEndpointProvider sendEndpointProvider, MessageQueues messageQueues)
     {
         _productService = productService;
         _sendEndpointProvider = sendEndpointProvider;
+        _messageQueues = messageQueues;
     }
 
     [BindProperty]
@@ -40,9 +42,9 @@ public class IndexModel: PageModel
 
         if(isDeleted)
         {
-            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{_messageQueues.CentralQueue}"));
 
-            await endpoint.Send(new ProductDeleted(MessageQueues.StoreId, productId));
+            await endpoint.Send(new ProductDeleted(_messageQueues.StoreID, productId));
 
             return RedirectToPage("Index");
         }

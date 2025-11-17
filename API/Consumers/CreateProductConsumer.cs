@@ -3,22 +3,26 @@ using Core.Models;
 using Core.Services;
 using MassTransit;
 
+namespace API.Consumers;
+
 public class CreateProductConsumer: IConsumer<CreateProduct>
 {
     private readonly IProductService _productService;
     private readonly ILogger<CreateProductConsumer> _logger;
+    private readonly MessageQueues _messageQueues;
 
-    public CreateProductConsumer(IProductService productService, ILogger<CreateProductConsumer> logger)
+    public CreateProductConsumer(IProductService productService, ILogger<CreateProductConsumer> logger, MessageQueues messageQueues)
     {
         _productService = productService;
         _logger = logger;
+        _messageQueues = messageQueues;
     }
 
     public async Task Consume(ConsumeContext<CreateProduct> context)
     {
         var message = context.Message;
 
-        if (message.ProductExtended.StoreId != MessageQueues.StoreId)
+        if (message.ProductExtended.StoreId != _messageQueues.StoreID)
         {
             return;
         }

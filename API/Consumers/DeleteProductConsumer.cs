@@ -1,26 +1,29 @@
 ﻿using Core.Messages;
-using Core.Models;
 using Core.Services;
 using MassTransit;
+
+namespace API.Consumers;
 
 public class DeleteProductConsumer: IConsumer<DeleteProduct>
 {
     private readonly IProductService _productService;
     private readonly ILogger<DeleteProductConsumer> _logger;
+    private readonly MessageQueues _messageQueues;
 
-    public DeleteProductConsumer(IProductService productService, ILogger<DeleteProductConsumer> logger)
+    public DeleteProductConsumer(IProductService productService, ILogger<DeleteProductConsumer> logger, MessageQueues messageQueues)
     {
         _productService = productService;
         _logger = logger;
+        _messageQueues = messageQueues;
     }
 
     public async Task Consume(ConsumeContext<DeleteProduct> context)
     {
         var message = context.Message;
 
-        if (message.StoreId != MessageQueues.StoreId)
+        if (message.StoreID != _messageQueues.StoreID)
         {
-            _logger.LogInformation("Ignoring DeleteProduct message for StoreId: {StoreId}", message.StoreId);
+            _logger.LogInformation("Ignoring DeleteProduct message for StoreId: {StoreId}", message.StoreID);
 
             return;
         }

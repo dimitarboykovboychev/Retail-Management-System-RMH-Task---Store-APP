@@ -27,12 +27,33 @@ namespace API.Controllers
 
             if(createdProduct != null)
             {
-                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductCreatedQueue}"));
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
 
                 await endpoint.Send(new ProductCreated(MessageQueues.StoreId, createdProduct));
             }
 
             return Ok(createdProduct);
+        }
+
+        [HttpDelete("{storeId}/{productId}")]
+        public async Task<IActionResult> Delete(Guid storeId, Guid productId)
+        {
+            if (storeId != MessageQueues.StoreId)
+            {
+                return BadRequest("Invalid StoreId");
+            }
+
+            bool isDeleted = await _productService.DeleteProductAsync(productId);
+
+            if (isDeleted)
+            {
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
+                await endpoint.Send(new ProductDeleted(MessageQueues.StoreId, productId));
+                
+                return Ok();
+            }
+            
+            return NotFound();
         }
 
         [HttpGet]

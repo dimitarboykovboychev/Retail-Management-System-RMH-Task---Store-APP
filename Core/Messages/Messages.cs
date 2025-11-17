@@ -1,11 +1,14 @@
 ﻿using Core.Models;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Core.Messages;
 
 public record ProductCreated(Guid StoreId, Product Product);
+public record ProductDeleted(Guid StoreId, Guid ProductId);
+
 
 public record CreateProduct(ProductExtended ProductExtended);
+
+public record DeleteProduct(Guid StoreId, Guid ProductId);
 
 public static class MessageQueues
 {
@@ -20,5 +23,5 @@ public static class MessageQueues
         RoutingKey = $"{ StoreId.ToString() }.product";
     }
 
-    public const string ProductCreatedQueue = "product-created-queue";
+    public const string ProductQueue = "product-queue";
 }

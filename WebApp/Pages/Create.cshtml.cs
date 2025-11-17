@@ -52,7 +52,7 @@ public class CreateModel: PageModel
 
         if (product != null)
         {
-            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductCreatedQueue}"));
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{MessageQueues.ProductQueue}"));
 
             await endpoint.Send(new ProductCreated(MessageQueues.StoreId, product));
 

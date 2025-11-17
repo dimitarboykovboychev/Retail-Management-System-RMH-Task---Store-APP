@@ -6,10 +6,12 @@ using MassTransit;
 public class CreateProductConsumer: IConsumer<CreateProduct>
 {
     private readonly IProductService _productService;
+    private readonly ILogger<CreateProductConsumer> _logger;
 
-    public CreateProductConsumer(IProductService productService)
+    public CreateProductConsumer(IProductService productService, ILogger<CreateProductConsumer> logger)
     {
         _productService = productService;
+        _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<CreateProduct> context)
@@ -33,6 +35,8 @@ public class CreateProductConsumer: IConsumer<CreateProduct>
         };
 
         await _productService.CreateProductAsync(product);
+
+        _logger.LogInformation("Created product with ProductId: {ProductId}", product.ProductId);
 
         await Task.CompletedTask;
     }

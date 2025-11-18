@@ -2,6 +2,7 @@ using Core.Messages;
 using Core.Models;
 using Core.Services;
 using MassTransit;
+using MessageContracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -29,7 +30,17 @@ namespace API.Controllers
             if(createdProduct != null)
             {
                 var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{_messageQueues.CentralQueue}"));
-                await endpoint.Send(new ProductCreated(_messageQueues.StoreID, createdProduct));
+                await endpoint.Send(new ProductCreated(new ProductDTO
+                {
+                    StoreID = _messageQueues.StoreID,
+                    ProductID = createdProduct.ProductId,
+                    Name = createdProduct.Name,
+                    Description = createdProduct.Description,
+                    Price = createdProduct.Price,
+                    MinPrice = createdProduct.MinPrice,
+                    CreatedOn = createdProduct.CreatedOn,
+                    UpdatedOn = createdProduct.UpdatedOn
+                }));
             }
 
             return Ok(createdProduct);

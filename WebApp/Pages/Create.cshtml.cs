@@ -2,6 +2,7 @@ using Core.Messages;
 using Core.Models;
 using Core.Services;
 using MassTransit;
+using MessageContracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -56,7 +57,17 @@ public class CreateModel: PageModel
         {
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{_messageQueues.CentralQueue}"));
 
-            await endpoint.Send(new ProductCreated(_messageQueues.StoreID, product));
+            await endpoint.Send(new ProductCreated(new ProductDTO
+            {
+                StoreID = _messageQueues.StoreID,
+                ProductID = product.ProductId,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                MinPrice = product.MinPrice,
+                CreatedOn = product.CreatedOn,
+                UpdatedOn = product.UpdatedOn
+            }));
 
             return RedirectToPage("Index");
         }

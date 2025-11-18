@@ -16,13 +16,11 @@ namespace Core.Services
             _logger = logger;
         }
 
-        public async Task<List<Product>> GetProductsAsync()
+        public async Task<IEnumerable<Product>> GetProductsAsync()
         {
-            var products = new List<Product>();
-
             try
             {
-                products = await _dbContext.Products.ToListAsync();
+                var products = await _dbContext.Products.ToListAsync();
 
                 return products;
             }

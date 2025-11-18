@@ -1,6 +1,7 @@
 ﻿using Core.Messages;
 using Core.Services;
 using MassTransit;
+using MessageContracts;
 
 namespace API.Consumers;
 
@@ -28,9 +29,9 @@ public class DeleteProductConsumer: IConsumer<DeleteProduct>
             return;
         }
 
-        await _productService.DeleteProductAsync(message.ProductId);
+        await _productService.DeleteProductAsync(message.ProductID);
 
-        _logger.LogInformation("Deleted product with ProductId: {ProductId}", message.ProductId);
+        _logger.LogInformation("Deleted product with ProductId: {ProductId}", message.ProductID);
 
         await Task.CompletedTask;
     }

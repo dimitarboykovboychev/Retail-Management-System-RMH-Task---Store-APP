@@ -2,6 +2,7 @@ using Core.Messages;
 using Core.Models;
 using Core.Services;
 using MassTransit;
+using MessageContracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -18,10 +19,12 @@ public class IndexModel: PageModel
         _productService = productService;
         _sendEndpointProvider = sendEndpointProvider;
         _messageQueues = messageQueues;
+
+        Products = new List<Product>();
     }
 
     [BindProperty]
-    public IList<Product> Products { get; set; } = new List<Product>();
+    public IEnumerable<Product> Products { get; set; }
 
     [BindProperty]
     public string ProductId { get; set; }

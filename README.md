@@ -1,5 +1,9 @@
 # Retail Management System (RMH Task) - Store APP
 
+MessageContracts is referenced by both Store and Central apps. It is needed as it provides the common message structure.
+
+Testing can be done with both apps turned on in separate Visual Studio instances.
+
 This project uses MassTransit with RabbitMQ as the message broker. To run the apps locally, you’ll need Docker installed.
 
 Start RabbitMQ in Docker
